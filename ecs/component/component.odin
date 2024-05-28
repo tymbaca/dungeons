@@ -1,24 +1,32 @@
-package ecs
+package component
 
 import "core:fmt"
 import rl "vendor:raylib"
+
+BUFFER_SIZE :: 1024
 
 ComponentKind :: enum {
 	POSITION,
 	VELOCITY,
 	MOVEMENT,
+	MOVEMENT_STATE,
 	HEALTH,
 	DISPLAY,
 	SHAPE,
+	PLAYER,
+	ANIMATION,
 }
 
 Component :: union #no_nil {
 	Position,
 	Velocity,
 	Movement,
+	MovementState,
 	Health,
 	Display,
 	Shape,
+	Player,
+	Animation,
 }
 
 resolve_and_add_component :: proc(id: int, component: Component) -> ComponentKind {
@@ -32,6 +40,9 @@ resolve_and_add_component :: proc(id: int, component: Component) -> ComponentKin
 	case Movement:
 		MovementMap[id] = c
 		return .MOVEMENT
+	case MovementState:
+		MovementStateMap[id] = c
+		return .MOVEMENT_STATE
 	case Health:
 		HealthMap[id] = c
 		return .HEALTH
@@ -41,36 +52,13 @@ resolve_and_add_component :: proc(id: int, component: Component) -> ComponentKin
 	case Shape:
 		ShapeMap[id] = c
 		return .SHAPE
+	case Player:
+		// no need for map
+		return .PLAYER
+	case Animation:
+		AnimationMap[id] = c
+		return .ANIMATION
 	}
 
 	return {}
 }
-
-ShapeMap := make(map[ID]Shape, BUFFER_SIZE)
-Shape :: union #no_nil {
-	Rectangle,
-	Circle,
-}
-Rectangle :: struct {
-	width, height: f32,
-}
-Circle :: struct {
-	radius: f32,
-}
-
-DisplayMap := make(map[ID]Display, BUFFER_SIZE)
-Display :: distinct bool
-
-HealthMap := make(map[ID]Health, BUFFER_SIZE)
-Health :: distinct f32
-
-MovementMap := make(map[ID]Movement, BUFFER_SIZE)
-Movement :: struct {
-	speed: f32,
-}
-
-VelocityMap := make(map[ID]Velocity, BUFFER_SIZE)
-Velocity :: distinct rl.Vector2
-
-PositionMap := make(map[ID]Position, BUFFER_SIZE)
-Position :: distinct rl.Vector2
